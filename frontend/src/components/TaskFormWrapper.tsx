@@ -8,7 +8,6 @@ import {
   Button,
   CircularProgress,
   Fade,
-  Divider,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
@@ -25,9 +24,8 @@ interface TaskFormWrapperProps {
 export const TaskFormWrapper: React.FC<TaskFormWrapperProps> = ({
   children,
 }) => {
-  const { systemStatus, getSystemStatus, error } = useTaskStore();
+  const { systemStatus, error } = useTaskStore();
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
-  const [lastStatusCheck, setLastStatusCheck] = useState<Date | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [previousStatus, setPreviousStatus] =
     useState<typeof systemStatus>(null);
@@ -56,7 +54,6 @@ export const TaskFormWrapper: React.FC<TaskFormWrapperProps> = ({
           clearInterval(pollingInterval);
           setPollingInterval(null);
         }
-        setLastStatusCheck(new Date());
         if (showLoading) {
           setIsCheckingStatus(false);
         }
@@ -72,13 +69,11 @@ export const TaskFormWrapper: React.FC<TaskFormWrapperProps> = ({
       const data = await response.json();
 
       // Update the store directly to avoid triggering other effects
-      const { systemStatus: currentSystemStatus } = useTaskStore.getState();
       useTaskStore.setState({
         systemStatus: data,
         error: null,
       });
 
-      setLastStatusCheck(new Date());
       setHasServerError(false); // Reset error state on successful fetch
 
       if (showLoading) {
@@ -94,8 +89,6 @@ export const TaskFormWrapper: React.FC<TaskFormWrapperProps> = ({
         error:
           error instanceof Error ? error.message : "Unknown error occurred",
       });
-
-      setLastStatusCheck(new Date());
 
       if (showLoading) {
         setIsCheckingStatus(false);

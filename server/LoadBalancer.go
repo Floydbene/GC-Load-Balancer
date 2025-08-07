@@ -27,6 +27,17 @@ func (l *LoadBalancer) GetServer() *Server {
 
 // New method that considers both availability and memory capacity
 func (l *LoadBalancer) GetServerForTask(taskInput string) *Server {
+	// If TRINI is active and policy is GC-aware, use GC-aware selection
+	if l.TRINI != nil && l.TRINI.IsActive && l.CurrentPolicy.GCAware {
+		return l.GetServerGCAware(taskInput)
+	}
+
+	// Otherwise use regular round-robin
+	return l.getServerRoundRobin(taskInput)
+}
+
+// getServerRoundRobin implements the original round-robin algorithm
+func (l *LoadBalancer) getServerRoundRobin(taskInput string) *Server {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 

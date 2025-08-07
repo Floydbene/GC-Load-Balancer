@@ -29,8 +29,13 @@ func main() {
 	lb.Start()
 	time.Sleep(100 * time.Millisecond)
 
-	fmt.Println("✅ Load Balancer is ready!")
-	printHelp()
+	// Start TRINI GC-aware load balancing
+	fmt.Println("🔍 Starting TRINI GC-aware load balancing...")
+	lb.StartTRINI()
+	time.Sleep(500 * time.Millisecond)
+
+	fmt.Println("✅ Load Balancer with TRINI is ready!")
+	printTRINIHelp()
 
 	// Interactive command loop
 	scanner := bufio.NewScanner(os.Stdin)
@@ -73,8 +78,15 @@ func main() {
 		case "status", "s":
 			handleStatus(lb)
 
+		case "trini":
+			if len(parts) < 2 {
+				fmt.Println("❌ Usage: trini <on|off|status|policy>")
+				continue
+			}
+			handleTRINI(lb, parts[1:])
+
 		case "help", "h":
-			printHelp()
+			printTRINIHelp()
 
 		case "quit", "q", "exit":
 			fmt.Println("👋 Goodbye!")
@@ -86,15 +98,122 @@ func main() {
 	}
 }
 
-func printHelp() {
+func printTRINIHelp() {
 	fmt.Println("\n📋 Available Commands:")
 	fmt.Println("  task <text>     - Send a task to be processed (alias: t)")
 	fmt.Println("  ping <id>       - Ping a specific server (alias: p)")
 	fmt.Println("  status          - Show all servers status (alias: s)")
+	fmt.Println("  trini <cmd>     - TRINI GC-aware control (on|off|status|policy)")
 	fmt.Println("  help            - Show this help message (alias: h)")
 	fmt.Println("  quit            - Exit the program (alias: q, exit)")
 	fmt.Println("\nExample: task hello world")
 	fmt.Println("Example: ping 1")
+	fmt.Println("Example: trini status")
+}
+
+func handleTRINI(lb *server.LoadBalancer, args []string) {
+	if len(args) == 0 {
+		fmt.Println("❌ Usage: trini <on|off|status|policy>")
+		return
+	}
+
+	command := strings.ToLower(args[0])
+
+	switch command {
+	case "on":
+		if lb.TRINI != nil {
+			lb.TRINI.IsActive = true
+			fmt.Println("✅ TRINI GC-aware load balancing enabled")
+		} else {
+			fmt.Println("❌ TRINI not initialized")
+		}
+
+	case "off":
+		if lb.TRINI != nil {
+			lb.TRINI.IsActive = false
+			fmt.Println("⚠️ TRINI GC-aware load balancing disabled")
+		} else {
+			fmt.Println("❌ TRINI not initialized")
+		}
+
+	case "status":
+		showTRINIStatus(lb)
+
+	case "policy":
+		if len(args) > 1 {
+			setPolicyFromArgs(lb, args[1:])
+		} else {
+			showCurrentPolicy(lb)
+		}
+
+	default:
+		fmt.Printf("❌ Unknown TRINI command: %s\n", command)
+		fmt.Println("Available: on, off, status, policy")
+	}
+}
+
+func showTRINIStatus(lb *server.LoadBalancer) {
+	if lb.TRINI == nil {
+		fmt.Println("❌ TRINI not initialized")
+		return
+	}
+
+	fmt.Println("\n🔍 TRINI Status:")
+	fmt.Printf("   Active: %t\n", lb.TRINI.IsActive)
+	fmt.Printf("   Monitor Interval: %v\n", lb.TRINI.MonitorInterval)
+	fmt.Printf("   Analysis Interval: %v\n", lb.TRINI.AnalysisInterval)
+	fmt.Printf("   Program Families: %d\n", len(lb.TRINI.ProgramFamilies))
+
+	fmt.Println("\n📊 Server Family Classifications:")
+	for _, server := range lb.Servers {
+		if server.CurrentFamily != nil {
+			fmt.Printf("   Server %d: %s\n", server.ID, server.CurrentFamily.Name)
+			if server.LastMaGCForecast != nil {
+				timeToMaGC := server.LastMaGCForecast.TimeToMaGC
+				fmt.Printf("     Next MaGC in: %dms (confidence: %.2f)\n",
+					timeToMaGC, server.LastMaGCForecast.Confidence)
+			}
+		} else {
+			fmt.Printf("   Server %d: Not classified\n", server.ID)
+		}
+	}
+
+	fmt.Println("\n🔧 Current Policy:")
+	fmt.Printf("   Algorithm: %s\n", lb.CurrentPolicy.Algorithm)
+	fmt.Printf("   GC-Aware: %t\n", lb.CurrentPolicy.GCAware)
+	fmt.Printf("   MaGC Threshold: %dms\n", lb.CurrentPolicy.MaGCThreshold)
+}
+
+func showCurrentPolicy(lb *server.LoadBalancer) {
+	fmt.Println("\n🔧 Current Load Balancing Policy:")
+	fmt.Printf("   Algorithm: %s\n", lb.CurrentPolicy.Algorithm)
+	fmt.Printf("   GC-Aware: %t\n", lb.CurrentPolicy.GCAware)
+	fmt.Printf("   MaGC Threshold: %dms\n", lb.CurrentPolicy.MaGCThreshold)
+	fmt.Printf("   History Window: %d\n", lb.CurrentPolicy.HistoryWindowSize)
+}
+
+func setPolicyFromArgs(lb *server.LoadBalancer, args []string) {
+	if len(args) < 2 {
+		fmt.Println("❌ Usage: trini policy <algorithm> <threshold_ms>")
+		fmt.Println("Algorithms: RR, RAN, WRR, WRAN")
+		return
+	}
+
+	algorithm := strings.ToUpper(args[0])
+	threshold, err := strconv.ParseInt(args[1], 10, 64)
+	if err != nil {
+		fmt.Println("❌ Invalid threshold value")
+		return
+	}
+
+	policy := server.LoadBalancingPolicy{
+		Algorithm:         algorithm,
+		GCAware:           true,
+		MaGCThreshold:     threshold,
+		HistoryWindowSize: 30,
+	}
+
+	lb.SetLoadBalancingPolicy(policy)
 }
 
 func handleTask(lb *server.LoadBalancer, taskInput string) {

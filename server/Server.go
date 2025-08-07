@@ -57,18 +57,57 @@ func (s *Server) CollectGCTasks() {
 		return
 	}
 	s.isCollectingGCTasks = true
+
+	magcStartTime := time.Now()
 	s.mu.Unlock()
 
 	fmt.Printf("Server %d: Collecting GC tasks...\n", s.ID)
-	time.Sleep(time.Duration(10000) * time.Millisecond)
+
+	gcDuration := s.calculateGCDuration()
+	time.Sleep(time.Duration(gcDuration) * time.Millisecond)
 
 	s.mu.Lock()
+
+	magcEndTime := time.Now()
+	s.MaGCDuration = magcEndTime.Sub(magcStartTime).Milliseconds()
+	s.LastMaGCTime = magcEndTime
+	s.GCCount++
+
+	// Reset memory state after GC
 	s.isCollectingGCTasks = false
 	s.TaskStorage = make([]string, 0)
-	s.usedMemory = 0 // Reset memory after GC
+	s.usedMemory = 0
+	s.YoungGenUsed = 0
+	s.OldGenUsed = 0
+
 	s.mu.Unlock()
 
-	fmt.Printf("Server %d: GC tasks collected, ready for new tasks\n", s.ID)
+	fmt.Printf("Server %d: GC tasks collected (duration: %dms), ready for new tasks\n",
+		s.ID, s.MaGCDuration)
+}
+
+// calculateGCDuration simulates realistic GC duration based on memory usage
+func (s *Server) calculateGCDuration() int64 {
+	s.mu.Lock()
+	memoryUsage := float64(s.usedMemory) / float64(s.memLimit)
+	s.mu.Unlock()
+
+	// Base GC duration: 10000ms to 3000ms based on memory usage
+	baseDuration := 10000 + int64(memoryUsage*2500)
+
+	// Add some randomness (±20%)
+	variation := int64(float64(baseDuration) * 0.2)
+	randomVariation := rand.Int63n(variation*2) - variation
+
+	duration := baseDuration + randomVariation
+	if duration < 100 {
+		duration = 100
+	}
+	if duration > 5000 {
+		duration = 5000
+	}
+
+	return duration
 }
 
 func (s *Server) IsAvailable() bool {
@@ -157,7 +196,31 @@ func (s *Server) handleTask(input string) Task {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.usedMemory += len(input)
+	taskSize := len(input)
+	s.usedMemory += taskSize
+
+	// Simulate generational heap behavior
+	// Most allocations go to young generation first
+	youngGenAllocation := int(float64(taskSize) * 0.8) // 80% to young gen
+	oldGenAllocation := taskSize - youngGenAllocation  // 20% to old gen
+
+	s.YoungGenUsed += youngGenAllocation
+	s.OldGenUsed += oldGenAllocation
+
+	// Simulate young generation promotion to old generation
+	if s.YoungGenUsed > s.YoungGenMax/2 {
+		promoted := s.YoungGenUsed / 4 // Promote 25% of young gen
+		s.YoungGenUsed -= promoted
+		s.OldGenUsed += promoted
+	}
+
+	// Ensure we don't exceed limits
+	if s.YoungGenUsed > s.YoungGenMax {
+		s.YoungGenUsed = s.YoungGenMax
+	}
+	if s.OldGenUsed > s.OldGenMax {
+		s.OldGenUsed = s.OldGenMax
+	}
 
 	task := Task{
 		ID:        fmt.Sprintf("task-%d", rand.Intn(1000)),

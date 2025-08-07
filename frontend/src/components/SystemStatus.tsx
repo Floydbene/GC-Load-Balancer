@@ -165,7 +165,7 @@ export const SystemStatus: React.FC = () => {
 
   useEffect(() => {
     getSystemStatus();
-    const interval = setInterval(getSystemStatus, 5000); // Refresh every 5 seconds
+    const interval = setInterval(getSystemStatus, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, [getSystemStatus]);
 
