@@ -414,72 +414,6 @@ const AboutTRINI: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* MAPE-K Architecture */}
-      <Card>
-        <CardContent>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            <AutoGraphIcon color="primary" />
-            MAPE-K Adaptive Architecture
-          </Typography>
-          <Typography variant="body2" color="text.secondary" paragraph>
-            TRINI follows the well-known MAPE-K
-            (Monitor-Analyze-Plan-Execute-Knowledge) adaptive model:
-          </Typography>
-
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <MemoryIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Monitor"
-                secondary="Collects GC and memory snapshots from application nodes periodically"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <ScienceIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Analyze"
-                secondary="Evaluates server GC characteristics and determines optimal program family classification"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Plan"
-                secondary="Selects appropriate load balancing policies based on GC behavior analysis"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <SpeedIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Execute"
-                secondary="Applies GC-aware load balancing decisions using MaGC forecasts"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <SchoolIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Knowledge"
-                secondary="Program families database containing GC behavior patterns and policies"
-              />
-            </ListItem>
-          </List>
-        </CardContent>
-      </Card>
-
       {/* Load Balancing Algorithms */}
       <Card>
         <CardContent>
@@ -609,70 +543,6 @@ const AboutTRINI: React.FC = () => {
               of the forecast based on data quality
             </Typography>
           </Box>
-        </CardContent>
-      </Card>
-
-      {/* Program Families */}
-      <Card>
-        <CardContent>
-          <Typography
-            variant="h6"
-            gutterBottom
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            <SchoolIcon color="primary" />
-            Program Families
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary" paragraph>
-            Program families group applications with similar GC characteristics,
-            allowing TRINI to apply suitable load balancing policies for
-            different GC behavior patterns.
-          </Typography>
-
-          <Stack spacing={2}>
-            <Box sx={{ bgcolor: "success.50", p: 2, borderRadius: 1 }}>
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
-                color="success.main"
-              >
-                Short MaGC Family
-              </Typography>
-              <Typography variant="body2">
-                Applications with brief GC pauses (&lt; 100ms). Minimal
-                performance impact.
-              </Typography>
-            </Box>
-
-            <Box sx={{ bgcolor: "warning.50", p: 2, borderRadius: 1 }}>
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
-                color="warning.main"
-              >
-                Medium MaGC Family
-              </Typography>
-              <Typography variant="body2">
-                Applications with moderate GC pauses (100ms - 1s). Requires
-                careful scheduling.
-              </Typography>
-            </Box>
-
-            <Box sx={{ bgcolor: "error.50", p: 2, borderRadius: 1 }}>
-              <Typography
-                variant="subtitle2"
-                fontWeight="bold"
-                color="error.main"
-              >
-                Long MaGC Family
-              </Typography>
-              <Typography variant="body2">
-                Applications with lengthy GC pauses (&gt; 1s). High performance
-                impact, aggressive avoidance needed.
-              </Typography>
-            </Box>
-          </Stack>
         </CardContent>
       </Card>
     </Stack>
@@ -897,7 +767,14 @@ export const TRINIDashboard: React.FC = () => {
           <Tab label="Overview" />
           <Tab label="Server Details" />
           <Tab label="Policy Control" />
-          <Tab label="About TRINI" icon={<InfoIcon />} />
+          <Tab
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InfoIcon fontSize="small" />
+                About TRINI
+              </Box>
+            }
+          />
         </Tabs>
       </Box>
 
