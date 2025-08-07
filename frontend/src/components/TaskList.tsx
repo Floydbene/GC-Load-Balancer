@@ -86,7 +86,11 @@ const TaskItem: React.FC<{ task: Task }> = ({ task }) => {
               Output:
             </Typography>
             <Box className="bg-gray-50 p-2 rounded">
-              <Typography variant="body2" fontFamily="monospace">
+              <Typography
+                variant="body2"
+                fontFamily="monospace"
+                sx={{ overflow: "scroll" }}
+              >
                 {task.output}
               </Typography>
             </Box>
@@ -117,7 +121,7 @@ export const TaskList: React.FC<{ sx?: SxProps }> = ({ sx }) => {
 
   return (
     <Box sx={{ ...sx, overflow: "scroll", height: "30vh" }}>
-      <Box className="flex items-center justify-between mb-4">
+      <Box className="flex items-center justify-between mb-[20px]">
         <Typography variant="h5" component="h2">
           Tasks ({tasks.length})
         </Typography>
@@ -132,11 +136,17 @@ export const TaskList: React.FC<{ sx?: SxProps }> = ({ sx }) => {
         </Button>
       </Box>
 
-      <Stack spacing={2}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
+          gap: 2,
+        }}
+      >
         {tasks.map((task) => (
           <TaskItem key={task.id} task={task} />
         ))}
-      </Stack>
+      </Box>
     </Box>
   );
 };

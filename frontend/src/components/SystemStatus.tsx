@@ -230,7 +230,7 @@ export const SystemStatus: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Box className="grid grid-cols-2 md:grid-cols-2">
+      <Box className="grid grid-cols-4 md:grid-cols-2">
         {systemStatus.servers.map((server) => (
           <ServerCard key={server.server_id} server={server} />
         ))}

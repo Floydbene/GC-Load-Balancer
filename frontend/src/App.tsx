@@ -19,10 +19,10 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1976d2",
+      main: "#007d9c",
     },
     secondary: {
-      main: "#dc004e",
+      main: "#007d9c",
     },
   },
 });
@@ -33,42 +33,49 @@ function App() {
       <CssBaseline />
       <Box className="min-h-screen bg-gray-50">
         <AppBar position="static" elevation={1}>
-          <Toolbar sx={{ mx: "100px" }}>
-            <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
-              🚀 Load Balancer Dashboard
-            </Typography>
+          <Toolbar
+            sx={{
+              justifyContent: "center",
+              minHeight: "64px",
+              backgroundColor: "#007d9c",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <img
+                src="https://go.dev/blog/go-brand/Go-Logo/SVG/Go-Logo_Fuchsia.svg"
+                alt="Go Logo"
+                style={{ height: 60 }}
+              />
+              <Typography
+                variant="h5"
+                component="div"
+                sx={{ flexGrow: 1, my: "20px" }}
+              >
+                GC Load Balancer
+              </Typography>
+            </Box>
           </Toolbar>
         </AppBar>
 
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          <Box className="mb-[6px]">
-            <Typography variant="body1" color="text.secondary">
-              Submit tasks to the load balancer and monitor server status in
-              real-time
-            </Typography>
-          </Box>
-
+        <Container maxWidth="lg" sx={{ py: 4 }}>
           <ErrorAlert />
 
-          <Box className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Box className="grid grid-cols-1 lg:grid-cols-1 gap-8">
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: "column",
                 gap: 2,
               }}
             >
-              <Paper
-                elevation={1}
-                sx={{ p: 3, mb: 3, width: "50%", height: "fit-content" }}
-              >
+              <Paper elevation={1} sx={{ p: 3, mb: 3, height: "fit-content" }}>
                 <Typography variant="h5" component="h2" gutterBottom>
                   Submit Task
                 </Typography>
                 <TaskForm />
               </Paper>
 
-              <TaskList sx={{ width: "50%" }} />
+              <TaskList />
             </Box>
 
             <Box>
