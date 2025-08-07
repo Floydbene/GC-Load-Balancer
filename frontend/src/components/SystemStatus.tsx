@@ -192,7 +192,7 @@ export const SystemStatus: React.FC = () => {
 
   return (
     <Box className="mb-8">
-      <Box className="flex items-center justify-left mb-[20px] gap-[20px]">
+      <Box className="flex items-center justify-left my-[20px] gap-[20px]">
         <Typography variant="h5" component="h2">
           System Status
         </Typography>

@@ -60,7 +60,7 @@ func (s *Server) CollectGCTasks() {
 	s.mu.Unlock()
 
 	fmt.Printf("Server %d: Collecting GC tasks...\n", s.ID)
-	time.Sleep(time.Duration(rand.Intn(400)+100) * time.Millisecond)
+	time.Sleep(time.Duration(10000) * time.Millisecond)
 
 	s.mu.Lock()
 	s.isCollectingGCTasks = false
@@ -80,25 +80,27 @@ func (s *Server) IsAvailable() bool {
 
 func (s *Server) CanHandleTaskSize(taskSize int) bool {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	time.Sleep(100 * time.Millisecond)
 
 	if s.usedMemory+taskSize > s.memLimit {
-		go s.CollectGCTasks()
+		s.mu.Unlock()      // Unlock before blocking GC operation
+		s.CollectGCTasks() // Remove 'go' to make it blocking
 		return false
 	}
+	s.mu.Unlock()
 	return true
 }
 
 func (s *Server) canHandleTask(input string) bool {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	time.Sleep(100 * time.Millisecond)
 	taskSize := len(input)
 	if s.usedMemory+taskSize > s.memLimit {
-		go s.CollectGCTasks()
+		s.mu.Unlock()      // Unlock before blocking GC operation
+		s.CollectGCTasks() // Remove 'go' to make it blocking
 		return false
 	}
+	s.mu.Unlock()
 	return true
 }
 

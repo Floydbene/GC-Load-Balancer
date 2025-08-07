@@ -10,6 +10,7 @@ import {
   ThemeProvider,
   createTheme,
 } from "@mui/material";
+import { TaskFormWrapper } from "./components/TaskFormWrapper";
 import { TaskForm } from "./components/TaskForm";
 import { TaskList } from "./components/TaskList";
 import { SystemStatus } from "./components/SystemStatus";
@@ -68,12 +69,9 @@ function App() {
                 gap: 2,
               }}
             >
-              <Paper elevation={1} sx={{ p: 3, mb: 3, height: "fit-content" }}>
-                <Typography variant="h5" component="h2" gutterBottom>
-                  Submit Task
-                </Typography>
+              <TaskFormWrapper>
                 <TaskForm />
-              </Paper>
+              </TaskFormWrapper>
 
               <TaskList />
             </Box>
