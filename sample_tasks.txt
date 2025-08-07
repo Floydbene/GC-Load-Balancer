@@ -1,0 +1,24 @@
+# Sample tasks for load balancer benchmarking
+# Lines starting with # are comments and will be ignored
+# Each line represents one task to be processed
+
+hello world
+process this data
+quick task
+medium length processing job
+analyze user behavior patterns
+compute mathematical calculations
+handle network request processing
+manage database transaction
+execute background job processing
+transform data structures
+validate input parameters
+generate report summaries
+parse configuration files
+optimize performance metrics
+handle concurrent operations
+process batch data updates
+manage memory allocation
+execute cleanup operations
+handle error recovery
+process user authentication 
