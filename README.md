@@ -6,6 +6,10 @@ A distributed task processing system built in Go with a React frontend, demonstr
 
 This project implements a **load balancer** that distributes incoming tasks across multiple backend servers. The system intelligently routes tasks based on server availability and memory capacity, providing a practical example of distributed computing concepts.
 
+### Demo
+
+https://github.com/user-attachments/assets/c097b5e6-1eaa-495d-8373-108a064837e7
+
 ### Key Features
 
 - **Round-robin load balancing** with intelligent server selection
